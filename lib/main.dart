@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/page/home_page.dart';
+import 'package:todo_app/sembast_todo.dart';
 
 void main() {
+  Sembast().createDB();
   runApp(const MyApp());
 }
 
@@ -24,7 +27,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomePage(),
     );
   }
 }

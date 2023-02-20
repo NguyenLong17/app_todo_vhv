@@ -1,35 +1,21 @@
-class ToDo {
-  final int id;
-  final String name;
-  final String date;
+class Todo {
+  int? id;
+  String task;
+  bool isDone;
+  String timeStamp;
 
-  ToDo({
-    required this.id,
-    required this.name,
-    required this.date,
+  Todo({
+    required this.task,
+    required this.isDone,
+    required this.timeStamp,
   });
 
   Map<String, dynamic> toMap() {
-    return {'name': name, 'date': date};
+    return {"task": task, "isDone": isDone, "timeStamp": timeStamp};
   }
 
-  factory ToDo.fromMap(int id, Map<String, dynamic> map) {
-    return ToDo(
-      id: id,
-      name: map['name'],
-      date: map['date'],
-    );
-  }
-
-  ToDo copyWith({
-    required int id,
-    required String name,
-    required String date,
-  }) {
-    return ToDo(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      date: date ?? this.date,
-    );
+  static Todo fromMap(Map<String, dynamic> map) {
+    return Todo(
+        task: map["task"], isDone: map["isDone"], timeStamp: map["timeStamp"]);
   }
 }
