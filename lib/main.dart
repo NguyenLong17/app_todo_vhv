@@ -3,7 +3,7 @@ import 'package:todo_app/page/home_page.dart';
 import 'package:todo_app/sembast_todo.dart';
 
 void main() {
-  Sembast().createDB();
+  Sembast().create();
   runApp(const MyApp());
 }
 
