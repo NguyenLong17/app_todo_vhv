@@ -4,6 +4,7 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:todo_app/sembast_todo.dart';
 
+import '../common/dialog.dart';
 import '../model/todo.dart';
 
 class HomePage extends StatefulWidget {
@@ -163,33 +164,35 @@ class _HomePageState extends State<HomePage> {
               ),
               IconButton(
                 onPressed: () {
-                  SembastToDo().getByID(todo).then((todo) {
-                    setState(() {
-                      print('Task: ${todo.task}');
-                      _taskController.text = todo.task ?? "";
-                      _dateTimeController.text = todo.time ?? "";
-                    });
-                  });
+
+
+                  // SembastToDo().getByID(todo).then((todo) {
+                  //   setState(() {
+                  //     print('Task: ${todo.task}');
+                  //     _taskController.text = todo.task ?? "";
+                  //     _dateTimeController.text = todo.time ?? "";
+                  //   });
+                  // });
                 },
                 icon: Icon(
                   Icons.settings,
                 ),
               ),
 
-              GestureDetector(
-                  onTap: () {
-                    addToDo();
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: 32,
-                    width: 64,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.red,
-                        )),
-                    child: const Text('Update'),
-                  )),
+              // GestureDetector(
+              //     onTap: () {
+              //       addToDo();
+              //     },
+              //     child: Container(
+              //       alignment: Alignment.center,
+              //       height: 32,
+              //       width: 64,
+              //       decoration: BoxDecoration(
+              //           border: Border.all(
+              //             color: Colors.red,
+              //           )),
+              //       child: const Text('Update'),
+              //     )),
               SizedBox(width: 8,),
               IconButton(
                 onPressed: () {
