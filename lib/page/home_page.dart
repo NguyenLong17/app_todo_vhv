@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:todo_app/sembast_todo.dart';
 
 import '../model/todo.dart';
 
@@ -15,141 +16,209 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _taskController = TextEditingController();
   final _dateTimeController = TextEditingController();
-  final List<Todo> listToDo = [];
-  String? birthDateInString;
+
+  String? dateTimeString;
   DateTime? birthDate;
+  final todo = Todo();
+
+  @override
+  void initState() {
+    SembastToDo().getAllSortedByID();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Todo App"),
+        title: const Text("Todo App"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                setState(() {});
+              },
+              icon: Icon(Icons.downloading))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: Column(
           children: [
-            TextField(
-              controller: _taskController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Task',
-              ),
+            const SizedBox(
+              height: 16,
             ),
-            SizedBox(
-              height: 8,
+            buildBodyTask(),
+            const SizedBox(
+              height: 16,
             ),
             Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    readOnly: false,
-                    controller: _dateTimeController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'DateTime',
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 16,
-                ),
                 GestureDetector(
                     onTap: () {
-                      getDateTine();
+                      SembastToDo().update(
+                          todo: todo,
+                          time: _dateTimeController.text,
+                          task: _taskController.text);
                     },
-                    child: Icon(
-                      Icons.calendar_month,
-                      size: 64,
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: 32,
+                      width: 64,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                        color: Colors.green,
+                      )),
+                      child: const Text('Add'),
                     )),
+                SizedBox(
+                  width: 32,
+                ),
+
               ],
             ),
-            GestureDetector(
-                onTap: () {
-                  create();
-                },
-                child: Container(
-                  child: Text('Add'),
-                )),
-            Expanded(child: buildListToDo()),
+            SizedBox(
+              height: 16,
+            ),
+            Expanded(
+              child: buildListToDo(SembastToDo().listToDo),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget buildListToDo() {
+  Widget buildBodyTask() {
+    return Column(
+      children: [
+        TextField(
+          controller: _taskController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Task',
+          ),
+        ),
+        const SizedBox(
+          height: 8,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                readOnly: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                controller: _dateTimeController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'DateTime',
+                ),
+              ),
+            ),
+            const SizedBox(
+              width: 16,
+            ),
+            GestureDetector(
+                onTap: () {
+                  getDateTine();
+                },
+                child: const Icon(
+                  Icons.calendar_month,
+                  size: 64,
+                )),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildListToDo(List items) {
     return ListView.separated(
-      itemCount: listToDo.length,
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
+      itemCount: items.length,
+      separatorBuilder: (BuildContext context, int index) => const SizedBox(
+        height: 16,
+      ),
       itemBuilder: (BuildContext context, int index) {
-        final todo = listToDo[index];
+        final todo = items[index];
         return Card(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                todo.task,
-                style: TextStyle(fontSize: 16),
+              Expanded(
+                child: Column(
+                  children: [
+                    Text(
+                      todo.task ?? "",
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    Text(
+                      todo.time ?? "",
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(
-                width: 16,
+              IconButton(
+                onPressed: () {
+                  SembastToDo().getByID(todo).then((todo) {
+                    setState(() {
+                      print('Task: ${todo.task}');
+                      _taskController.text = todo.task ?? "";
+                      _dateTimeController.text = todo.time ?? "";
+                    });
+                  });
+                },
+                icon: Icon(
+                  Icons.settings,
+                ),
               ),
-              Text(todo.timeStamp),
+
+              GestureDetector(
+                  onTap: () {
+                    addToDo();
+                  },
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: 32,
+                    width: 64,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.red,
+                        )),
+                    child: const Text('Update'),
+                  )),
+              SizedBox(width: 8,),
+              IconButton(
+                onPressed: () {
+                  SembastToDo().delete(todo);
+                },
+                icon: Icon(
+                  Icons.delete,
+                ),
+              ),
             ],
           ),
         );
       },
     );
   }
-  Future create() async {
-    // File path to a file in the current directory
-    print('Sembast.create');
-    String dbPath = 'sample.db';
-    final path = await getApplicationDocumentsDirectory();
-    DatabaseFactory dbFactory = databaseFactoryIo;
 
-// We use the database factory to open the database
-    Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
-    print('Sembast.create11');
-
-    // dynamically typed store
-    var store = StoreRef.main();
-// Easy to put/get simple values or map
-// A key can be of type int or String and the value can be anything as long as it can
-// be properly JSON encoded/decoded
-    await store.record('title').put(db, 'Simple application');
-    await store.record('version').put(db, 10);
-    await store.record('settings').put(db, {'offline': true});
-
-// read values
-    var title = await store.record('title').get(db) as String;
-    print('Sembast.create: $title');
-    var version = await store.record('version').get(db) as int;
-    var settings = await store.record('settings').get(db) as Map;
-
-// ...and delete
-    await store.record('version').delete(db);
-  }
-  Future addTdo() async {
-//     Directory appDocDirectory = await getApplicationDocumentsDirectory();
-//
-//     Directory(appDocDirectory.path+'/'+'dir').create(recursive: true)
-// // The created directory is returned as a Future.
-//         .then((Directory directory) {
-//       print('Path of New Dir: '+directory.path);
-//     });
+  void addToDo() {
+    SembastToDo().insert(
+      todo: todo,
+      time: _dateTimeController.text,
+      task: _taskController.text,
+    );
     setState(() {
-      Todo? todo;
-      todo?.timeStamp = _dateTimeController.text;
-      todo?.isDone = true;
-      todo?.task = _taskController.text;
-      listToDo.add(todo ??
-          Todo(
-              task: _taskController.text,
-              isDone: true,
-              timeStamp: "None"));
+      _dateTimeController.text = "";
+      _taskController.text = "";
     });
   }
+
+  void updateToDo() {}
 
   void getDateTine() async {
     final datePick = await showDatePicker(
@@ -159,9 +228,9 @@ class _HomePageState extends State<HomePage> {
         lastDate: DateTime(2100));
     if (datePick != null && datePick != birthDate) {
       birthDate = datePick;
-      birthDateInString =
+      dateTimeString =
           "${birthDate?.day}/${birthDate?.month}/${birthDate?.year}";
-      _dateTimeController.text = birthDateInString ?? '';
+      _dateTimeController.text = dateTimeString ?? '';
     }
     setState(() {});
   }
