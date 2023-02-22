@@ -14,6 +14,8 @@ class SembastToDo {
   int? key;
 
   List<Todo> listToDo = [];
+  bool onFilter = false;
+  List<Todo> listToDoFilByTime = [];
 
   // final todo = Todo();
 
@@ -30,22 +32,6 @@ class SembastToDo {
     Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
     await store.add(db, todo.toMap());
     listToDo.add(todo);
-    time = "";
-    task = "";
-  }
-
-
-
-  Future<Todo> getByID(Todo todo) async {
-    final path = await getApplicationDocumentsDirectory();
-
-    Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
-
-    await store.record(15).put(db, todo.toMap());
-
-    final todoSelect = await store.record(15).get(db) as Map<String, dynamic>;
-    final data = Todo.fromMap(todoSelect);
-    return data;
   }
 
   Future<List<Todo>> getAllSortedByID() async {
@@ -53,7 +39,7 @@ class SembastToDo {
 
     Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
     final finder = Finder(sortOrders: [
-      SortOrder('task'),
+      SortOrder("time"),
     ]);
 
     final recordSnapshots = await store.find(
@@ -69,7 +55,43 @@ class SembastToDo {
     return listToDo;
   }
 
+  Future<List<Todo>> getByTime(String time) async {
+    onFilter = true;
+    final path = await getApplicationDocumentsDirectory();
 
+    Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
+    final finder = Finder(filter: Filter.equals("time", time));
+
+    final recordSnapshots = await store.find(
+      db,
+      finder: finder,
+    );
+
+    listToDoFilByTime = recordSnapshots.map((snapshot) {
+      final todo = Todo.fromMap(snapshot.value);
+      todo.id = snapshot.key;
+      return todo;
+    }).toList();
+    return listToDoFilByTime;
+  }
+
+  void reload() {
+    onFilter = false;
+    getAllSortedByID();
+  }
+
+  Future<Todo> getByID(Todo todo) async {
+    final path = await getApplicationDocumentsDirectory();
+
+    Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
+    final key = todo.id;
+
+    await store.record(key!).put(db, todo.toMap());
+
+    final todoSelect = await store.record(15).get(db) as Map<String, dynamic>;
+    final data = Todo.fromMap(todoSelect);
+    return data;
+  }
 
   Future update(
       {required Todo todo, required String time, required String task}) async {
