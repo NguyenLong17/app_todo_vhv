@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:todo_app/page/task_page.dart';
 
 import '../model/todo.dart';
 
 void showBottomSheetTask({
   required BuildContext context,
-  Todo? todo,
+  Rx<Todo>? todo,
 }) {
   showModalBottomSheet(
     context: context,
@@ -19,7 +20,7 @@ void showBottomSheetTask({
         ),
         margin: EdgeInsets.all(8),
         child: TaskPage(
-          todo: todo ?? Todo(),
+          todo: todo ?? Rx(Todo(complete: false)),
         ),
       );
     },

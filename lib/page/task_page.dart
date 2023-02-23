@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:todo_app/controller/sembast_controller.dart';
+import 'package:todo_app/generated/l10n.dart';
 
 import '../model/todo.dart';
-import '../sembast/sembast_todo.dart';
 
 class TaskPage extends StatefulWidget {
-  final Todo todo;
+  final Rx<Todo> todo;
 
   const TaskPage({super.key, required this.todo});
 
@@ -16,10 +19,13 @@ class _TaskPageState extends State<TaskPage> {
   final taskController = TextEditingController();
   final timeController = TextEditingController();
 
+  final SembastToDoController sembastToDoController =
+      Get.put(SembastToDoController());
+
   @override
   void initState() {
-    taskController.text = widget.todo.task ?? "";
-    timeController.text = widget.todo.time ?? "";
+    taskController.text = widget.todo.value.task ?? "";
+    timeController.text = widget.todo.value.time ?? "";
     super.initState();
   }
 
@@ -28,7 +34,8 @@ class _TaskPageState extends State<TaskPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -37,9 +44,9 @@ class _TaskPageState extends State<TaskPage> {
             ),
             TextField(
               controller: taskController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Task',
+                labelText: S.of(context).Task,
               ),
             ),
             const SizedBox(
@@ -53,10 +60,9 @@ class _TaskPageState extends State<TaskPage> {
                     readOnly: false,
                     enabled: false,
                     controller: timeController,
-                    decoration: const InputDecoration(
-
+                    decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'DateTime',
+                      labelText: S.of(context).DateTime,
                     ),
                   ),
                 ),
@@ -65,9 +71,7 @@ class _TaskPageState extends State<TaskPage> {
                 ),
                 GestureDetector(
                     onTap: () {
-                      setState(() {
-                        showTime(context: context);
-                      });
+                      showTime(context: context);
                     },
                     child: const Icon(
                       Icons.calendar_month,
@@ -80,22 +84,23 @@ class _TaskPageState extends State<TaskPage> {
             ),
             GestureDetector(
               onTap: () {
-                if (widget.todo == Todo()) {
-                  SembastToDo().update(
+                if (SembastToDoController().checkUpdate == true) {
+                  print('_TaskPageState.build');
+                  SembastToDoController().updateTodo(
                       todo: widget.todo,
                       time: timeController.text,
                       task: taskController.text);
                 } else {
-                  SembastToDo().insert(
-                      todo: widget.todo,
-                      time: timeController.text,
-                      task: taskController.text);
+                  SembastToDoController().insertTodo(
+                    time: timeController.text,
+                    task: taskController.text,
+                  );
                 }
 
                 Navigator.of(context).pop();
               },
-              child: const Text(
-                "Complete",
+              child: Text(
+                S.of(context).Complete,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -124,7 +129,8 @@ class _TaskPageState extends State<TaskPage> {
         lastDate: DateTime(2100));
     if (datePick != null && datePick != dateTime) {
       dateTime = datePick;
-      dateTimeString = "${dateTime.day}/${dateTime.month}/${dateTime.year}";
+      dateTimeString = DateFormat('dd-MM-yyyy').format(dateTime);
+
       timeController.text = dateTimeString;
     }
   }

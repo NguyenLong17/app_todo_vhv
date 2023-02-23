@@ -1,14 +1,14 @@
 class Todo {
   Todo({
     this.task,
-    this.complete,
+    required this.complete,
     this.showUpdate,
     this.time,
     this.id,
   });
 
   String? task;
-  bool? complete;
+  bool complete = false;
   bool? showUpdate;
   String? time;
   int? id;

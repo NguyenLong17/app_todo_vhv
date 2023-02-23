@@ -1,26 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
+import 'package:todo_app/controller/app_controller.dart';
+import 'package:todo_app/generated/l10n.dart';
 import 'package:todo_app/page/home_page.dart';
 
+import 'demo_page/calendar_page.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   MyApp({super.key});
+  final AppController appStateController = Get.put(AppController());
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      // color: appColor.primaryColor,
-      theme: ThemeData(
-          // primarySwatch: appColor.backgroundColor,
+    return GetBuilder<AppController>(
+      builder: (_) {
+        return MaterialApp(
+          title: 'Flutter Demo',
+          debugShowCheckedModeBanner: false,
+          // color: appColor.primaryColor,
+          theme: ThemeData(
+              // primarySwatch: appColor.backgroundColor,
 
-      ),
-      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      home: HomePage(),
+          ),
+
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          locale: Locale(AppController().languageApp),
+          // home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          home:  StartPage(),
+        );
+      }
     );
   }
 }
