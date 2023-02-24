@@ -5,6 +5,7 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:todo_app/controller/app_controller.dart';
 import 'package:todo_app/model/todo.dart';
 
 class SembastToDoController extends GetxController {
@@ -15,11 +16,10 @@ class SembastToDoController extends GetxController {
   SembastToDoController._internal();
 
   RxList<Todo> listToDo = <Todo>[].obs;
+
   // RxList<Todo> listToDoFilter = <Todo>[].obs;
-  // bool onFilter = false;
 
   final timeController = TextEditingController();
-
 
   RxList<Todo> listToDoFilByTime = <Todo>[].obs;
   bool? checkUpdate;
@@ -50,10 +50,10 @@ class SembastToDoController extends GetxController {
 
     listToDo.addAll(recordSnapshots
         .map((snapshot) {
-      final todo = Todo.fromMap(snapshot.value);
-      todo.id = snapshot.key;
-      return todo.obs.value;
-    })
+          final todo = Todo.fromMap(snapshot.value);
+          todo.id = snapshot.key;
+          return todo.obs.value;
+        })
         .toList()
         .obs);
     SembastToDoController().update();
@@ -61,22 +61,45 @@ class SembastToDoController extends GetxController {
     return listToDo;
   }
 
-  Future reloadListtodo() async {
+  Future reloadListTodo() async {
     listToDo.clear();
     timeController.text = "";
     getAllTodo();
     SembastToDoController().update();
-
   }
 
   Future<List<Todo>> getTodoByTime(BuildContext context) async {
-    timeController.text = "";
+    // timeController.text = "";
     DateTime? dateTime;
     final datePick = await showDatePicker(
+        builder: (context, child) {
+          return Theme(
+              data: AppController().isDarkMode.value
+                  ? Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.dark(
+                        surface: Colors.black26,
+                        primary: Colors.black,
+                        // header background color
+                        onPrimary: Colors.white,
+                        // header text color
+                        onSurface: Colors.black, //
+                      ),
+                    )
+                  : Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: Colors.amber.shade200,
+                        // header background color
+                        onPrimary: Colors.black, // header text color
+                        onSurface: Colors.black, //
+                      ),
+                    ),
+              child: child!);
+        },
+        locale: Locale(AppController().languageApp),
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(1900),
-        lastDate: DateTime(2100));
+        lastDate: DateTime(2200));
     if (datePick != null && datePick != dateTime) {
       dateTime = datePick;
 
@@ -84,11 +107,40 @@ class SembastToDoController extends GetxController {
     }
 
     listToDo.clear();
-    Future.delayed(Duration(seconds: 1));
     final path = await getApplicationDocumentsDirectory();
 
     Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
     final finder = Finder(filter: Filter.equals("time", timeController.text));
+
+    final recordSnapshots = await store.find(
+      db,
+      finder: finder,
+    );
+    if (timeController.text.isEmpty) {
+      getAllTodo();
+    } else {
+      listToDo.addAll(recordSnapshots
+          .map((snapshot) {
+            final todo = Todo.fromMap(snapshot.value);
+            todo.id = snapshot.key;
+            return todo;
+          })
+          .toList()
+          .obs);
+      SembastToDoController().update();
+    }
+    return listToDo;
+  }
+
+  Future<List<Todo>> getTodoByCalendar(DateTime dateTime) async {
+    String timeSelected;
+    timeSelected = DateFormat('dd-MM-yyyy').format(dateTime);
+
+    listToDo.clear();
+    final path = await getApplicationDocumentsDirectory();
+
+    Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
+    final finder = Finder(filter: Filter.equals("time", timeSelected));
 
     final recordSnapshots = await store.find(
       db,

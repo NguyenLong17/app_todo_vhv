@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:todo_app/controller/app_controller.dart';
 
 
 class HiveManager {
@@ -12,6 +13,7 @@ class HiveManager {
   HiveManager._internal();
 
   final _currentBox = 'config';
+   String? timeHive;
 
 
   Future init() async {
@@ -23,7 +25,9 @@ class HiveManager {
     final box = Hive.box(_currentBox);
     final value = box.get(key);
     if (value != null) {
+
       return jsonDecode(value);
+
     }
     return null;
   }
@@ -35,14 +39,14 @@ class HiveManager {
     } else {
       box.put(key, jsonEncode(value));
     }
+
   }
 
-  Future remove(String key) async {
-    final box = Hive.box(_currentBox);
-    await box.delete(ToDoApp);
-  }
+
 }
 
-const ToDoApp = 'todoApp';
+const TodoAppLanguage = 'todoAppLanguage';
+const TodoAppTheme = 'TodoAppTheme';
+
 
 final hive = HiveManager();

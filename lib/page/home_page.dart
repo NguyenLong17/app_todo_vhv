@@ -4,6 +4,7 @@ import 'package:todo_app/common/show_bottom_sheet.dart';
 import 'package:todo_app/controller/sembast_controller.dart';
 import 'package:todo_app/generated/l10n.dart';
 import 'package:get/get.dart';
+import 'package:todo_app/hive_manager.dart';
 
 import '../controller/app_controller.dart';
 import '../model/todo.dart';
@@ -16,7 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final SembastToDoController sembastToDoController =
       Get.put(SembastToDoController());
 
@@ -25,6 +25,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     SembastToDoController().getAllTodo();
+    hive.getValue(TodoAppLanguage);
+    hive.getValue(TodoAppTheme);
     super.initState();
   }
 
@@ -39,15 +41,12 @@ class _HomePageState extends State<HomePage> {
                 title: Text(S.of(context).TodoApp),
                 actions: [
                   IconButton(
-                      onPressed: () {
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.downloading)),
-                  IconButton(
                     onPressed: () {
                       appStateController.isDarkMode.value =
                           !appStateController.isDarkMode.value;
                       appStateController.update();
+                      hive.setValue(
+                          TodoAppTheme, appStateController.isDarkMode.value);
                     },
                     icon: appStateController.isDarkMode.value
                         ? const Icon(Icons.light_mode)
@@ -58,6 +57,8 @@ class _HomePageState extends State<HomePage> {
                       appStateController.isLanguage.value =
                           !appStateController.isLanguage.value;
                       appStateController.update();
+                      hive.setValue(
+                          TodoAppLanguage, appStateController.isLanguage.value);
                     },
                     icon: Icon(Icons.language),
                   ),
@@ -203,12 +204,17 @@ class _HomePageState extends State<HomePage> {
               return TextField(
                 style:
                     TextStyle(color: appStateController.backgroundPrimaryColor),
-                enableSuggestions: false,
+                // enableSuggestions: false,
                 readOnly: false,
                 enabled: false,
                 controller: SembastToDoController().timeController,
                 decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25)),
+                      borderSide: BorderSide(
+                          width: 1,
+                          color: appStateController.backgroundPrimaryColor),
+                    ),
                     labelText: S.of(context).DateTime,
                     labelStyle: TextStyle(
                       color: appStateController.backgroundPrimaryColor,
@@ -234,7 +240,7 @@ class _HomePageState extends State<HomePage> {
           ),
           GestureDetector(
             onTap: () {
-              SembastToDoController().reloadListtodo();
+              SembastToDoController().reloadListTodo();
             },
             child: Text(
               S.of(context).Cancel,
@@ -248,19 +254,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  // Future getTime() async {
-  //   DateTime? dateTime;
-  //   final datePick = await showDatePicker(
-  //       context: context,
-  //       initialDate: DateTime.now(),
-  //       firstDate: DateTime(1900),
-  //       lastDate: DateTime(2100));
-  //   if (datePick != null && datePick != dateTime) {
-  //     dateTime = datePick;
-  //
-  //     timeController.text = DateFormat('dd-MM-yyyy').format(dateTime);
-  //   }
-  //   SembastToDoController().getTodoByTime(timeController.text);
-  // }
 }
