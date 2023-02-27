@@ -8,19 +8,19 @@ class AppController extends GetxController {
 
   AppController._internal();
 
-  RxBool isDarkMode = false.obs;
+  bool isDarkMode = false;
 
 
-  RxBool isLanguage = false.obs;
+  bool isLanguage = false;
 
-  String get languageApp => isLanguage.value ? "en" : "vi";
+  String get languageApp => isLanguage ? "en" : "vi";
 
 
-  Color get backgroundColor => isDarkMode.value ? Colors.black : Colors.white;
+  Color get backgroundColor => isDarkMode ? Colors.black : Colors.white;
 
-  Color get backgroundPrimaryColor => isDarkMode.value ? Colors.white : Colors.black;
+  Color get backgroundPrimaryColor => isDarkMode ? Colors.white : Colors.black;
 
   Color get taskColor =>
-      isDarkMode.value ? Colors.grey.shade700 : Colors.yellow.shade200;
+      isDarkMode ? Colors.grey.shade700 : Colors.yellow.shade200;
 }
 

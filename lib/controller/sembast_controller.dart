@@ -17,15 +17,13 @@ class SembastToDoController extends GetxController {
 
   RxList<Todo> listToDo = <Todo>[].obs;
 
-  // RxList<Todo> listToDoFilter = <Todo>[].obs;
-
   final timeController = TextEditingController();
 
   RxList<Todo> listToDoFilByTime = <Todo>[].obs;
   bool? checkUpdate;
 
   String dbPath = 'sample.db';
-  var store = intMapStoreFactory.store('19');
+  var store = intMapStoreFactory.store('20');
   DatabaseFactory dbFactory = databaseFactoryIo;
 
   Future insertTodo({required String time, required String task}) async {
@@ -69,26 +67,22 @@ class SembastToDoController extends GetxController {
   }
 
   Future<List<Todo>> getTodoByTime(BuildContext context) async {
-    // timeController.text = "";
     DateTime? dateTime;
     final datePick = await showDatePicker(
         builder: (context, child) {
           return Theme(
-              data: AppController().isDarkMode.value
+              data: AppController().isDarkMode
                   ? Theme.of(context).copyWith(
-                      colorScheme: ColorScheme.dark(
+                      colorScheme: const ColorScheme.dark(
                         surface: Colors.black26,
                         primary: Colors.black,
-                        // header background color
                         onPrimary: Colors.white,
-                        // header text color
                         onSurface: Colors.black, //
                       ),
                     )
                   : Theme.of(context).copyWith(
                       colorScheme: ColorScheme.light(
                         primary: Colors.amber.shade200,
-                        // header background color
                         onPrimary: Colors.black, // header text color
                         onSurface: Colors.black, //
                       ),
@@ -103,7 +97,7 @@ class SembastToDoController extends GetxController {
     if (datePick != null && datePick != dateTime) {
       dateTime = datePick;
 
-      timeController.text = DateFormat('dd-MM-yyyy').format(dateTime);
+      timeController.text = DateFormat('yyyy-MM-dd').format(dateTime);
     }
 
     listToDo.clear();
@@ -132,15 +126,15 @@ class SembastToDoController extends GetxController {
     return listToDo;
   }
 
-  Future<List<Todo>> getTodoByCalendar(DateTime dateTime) async {
-    String timeSelected;
-    timeSelected = DateFormat('dd-MM-yyyy').format(dateTime);
-
+  Future<List<Todo>> sortByTime() async {
     listToDo.clear();
     final path = await getApplicationDocumentsDirectory();
 
     Database db = await dbFactory.openDatabase('${path.path}/$dbPath');
-    final finder = Finder(filter: Filter.equals("time", timeSelected));
+    final finder = Finder(sortOrders: [
+      SortOrder(
+        "time"
+    )]);
 
     final recordSnapshots = await store.find(
       db,

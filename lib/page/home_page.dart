@@ -4,7 +4,7 @@ import 'package:todo_app/common/show_bottom_sheet.dart';
 import 'package:todo_app/controller/sembast_controller.dart';
 import 'package:todo_app/generated/l10n.dart';
 import 'package:get/get.dart';
-import 'package:todo_app/hive_manager.dart';
+import 'package:todo_app/common/hive_manager.dart';
 
 import '../controller/app_controller.dart';
 import '../model/todo.dart';
@@ -26,7 +26,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     SembastToDoController().getAllTodo();
     hive.getValue(TodoAppLanguage);
-    hive.getValue(TodoAppTheme);
     super.initState();
   }
 
@@ -41,27 +40,43 @@ class _HomePageState extends State<HomePage> {
                 title: Text(S.of(context).TodoApp),
                 actions: [
                   IconButton(
+                      onPressed: () {
+                        SembastToDoController().sortByTime();
+                      },
+                      icon: const Icon(Icons.sort)),
+                  IconButton(
                     onPressed: () {
-                      appStateController.isDarkMode.value =
-                          !appStateController.isDarkMode.value;
+                      appStateController.isDarkMode =
+                          !appStateController.isDarkMode;
                       appStateController.update();
+
                       hive.setValue(
-                          TodoAppTheme, appStateController.isDarkMode.value);
+                          TodoAppTheme, appStateController.isDarkMode);
                     },
-                    icon: appStateController.isDarkMode.value
+                    icon: appStateController.isDarkMode
                         ? const Icon(Icons.light_mode)
                         : const Icon(Icons.dark_mode),
                   ),
                   IconButton(
                     onPressed: () {
-                      appStateController.isLanguage.value =
-                          !appStateController.isLanguage.value;
+                      appStateController.isLanguage =
+                          !appStateController.isLanguage;
                       appStateController.update();
                       hive.setValue(
-                          TodoAppLanguage, appStateController.isLanguage.value);
+                          TodoAppLanguage, appStateController.isLanguage);
                     },
-                    icon: Icon(Icons.language),
+                    icon: const Icon(Icons.language),
                   ),
+                  Center(
+                    child: Text(
+                      appStateController.languageApp,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  )
                 ],
               ),
               floatingActionButton: FloatingActionButton(
@@ -89,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                         sembastToDoController.listToDo,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 72,
                     )
                   ],
@@ -108,6 +123,13 @@ class _HomePageState extends State<HomePage> {
         ),
         itemBuilder: (BuildContext context, int index) {
           final todo = items[index].obs;
+
+          var inputFormat = DateFormat('yyyy-MM-dd');
+          var dateInput = inputFormat.parse(todo.value.time ?? '');
+
+          var outputFormat = DateFormat('dd-MM-yyyy');
+          var dateOutput = outputFormat.format(dateInput); //
+
           return GestureDetector(
             onTap: () {
               SembastToDoController().getTodoByID(todo);
@@ -135,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Text(
                             S.of(context).Delete,
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ],
                       ),
@@ -144,7 +166,7 @@ class _HomePageState extends State<HomePage> {
             },
             child: Card(
               shape: BeveledRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               color:
                   todo.value.complete ? Colors.green : Colors.yellow.shade100,
@@ -152,15 +174,16 @@ class _HomePageState extends State<HomePage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     IconButton(
                       onPressed: () {
                         sembastToDoController.completeTodo(todo: todo);
                       },
                       icon: todo.value.complete
-                          ? Icon(Icons.check_box)
-                          : Icon(Icons.square_outlined),
+                          ? const Icon(Icons.check_box)
+                          : const Icon(Icons.square_outlined),
                     ),
                     Expanded(
                       child: Column(
@@ -176,7 +199,7 @@ class _HomePageState extends State<HomePage> {
                             height: 16,
                           ),
                           Text(
-                            todo.value.time ?? "",
+                            dateOutput,
                             style: const TextStyle(
                               fontSize: 15,
                             ),
@@ -210,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                 controller: SembastToDoController().timeController,
                 decoration: InputDecoration(
                     disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(25)),
+                      borderRadius: const BorderRadius.all(Radius.circular(25)),
                       borderSide: BorderSide(
                           width: 1,
                           color: appStateController.backgroundPrimaryColor),

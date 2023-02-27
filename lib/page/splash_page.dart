@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/controller/app_controller.dart';
-import 'package:todo_app/hive_manager.dart';
+import 'package:todo_app/common/hive_manager.dart';
 import 'package:todo_app/page/home_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -25,27 +25,16 @@ class _SplashPageState extends State<SplashPage> {
   Future initData() async {
     await hive.init();
 
+   final  languageApp = await hive.getValue(TodoAppLanguage);
+   final  themeApp = await hive.getValue(TodoAppTheme);
+
+   AppController().isLanguage = languageApp;
+
+   AppController().isDarkMode = themeApp;
+
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomePage()),
         (Route<dynamic> route) => false);
-
-    //   if (AppController().isLanguage == null) {
-    //     await hive.getValue(TodoAppLanguage);
-    //     await hive.getValue(TodoAppTheme);
-    //
-    //     Navigator.of(context).pushAndRemoveUntil(
-    //         MaterialPageRoute(builder: (context) => const HomePage()),
-    //             (Route<dynamic> route) => false);
-    //   } else {
-    //
-    //     AppController().isLanguage = false.obs;
-    //
-    //     Navigator.of(context).pushAndRemoveUntil(
-    //         MaterialPageRoute(builder: (context) => const HomePage()),
-    //             (Route<dynamic> route) => false);
-    //   }
-    //   print('Languege: ${AppController().isLanguage!.value}');
-    // }
   }
 
   @override

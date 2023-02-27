@@ -85,7 +85,6 @@ class _TaskPageState extends State<TaskPage> {
             GestureDetector(
               onTap: () {
                 if (SembastToDoController().checkUpdate == true) {
-                  print('_TaskPageState.build');
                   SembastToDoController().updateTodo(
                       todo: widget.todo,
                       time: timeController.text,
@@ -129,7 +128,7 @@ class _TaskPageState extends State<TaskPage> {
         lastDate: DateTime(2100));
     if (datePick != null && datePick != dateTime) {
       dateTime = datePick;
-      dateTimeString = DateFormat('dd-MM-yyyy').format(dateTime);
+      dateTimeString = DateFormat('yyyy-MM-dd').format(dateTime);
 
       timeController.text = dateTimeString;
     }
